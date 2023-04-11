@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1 class="title">Gerador de senha</h1>
+        <p class="subtitle">
+          É o geras
+        </p>
+      </section>
+
+      <section class="box">
+        <div class="password">
+          <div class="text">
+            <input type="text" name="password" id="password" />            
+          </div>
+          <div class="actions">
+            <button id="copy-1">
+              <img src="copy.svg" width="42"/>
+            </button>
+            <button id="renew">
+              <img src="renew.svg" width="42"/>
+            </button>
+          </div>
+        </div>
+        <div class="security-indicator">
+          <div 
+            id="security-indicator-bar"
+            class="bar safe" 
+          ></div>
+        </div>
+      </section>
+
+      <section class="box customize">
+        <h3 class="title">Personalizar</h3>
+        <div class="actions">
+          <div class="password-length">
+            <p>Tamanho: <span id="password-length-text">16</span></p>
+            <input 
+              type="range";
+              name="password-length";
+              id="password-length";
+              class="slider";
+              value="16";
+              min="4";
+              max="64"; 
+            />
+          </div>
+          <div class="config">
+            <label class="checkbox-container">
+              <span class="text">Maiúsculas</span>
+              <input type="checkbox" id="uppercase-check" checked>
+              <span class="checkmark"></span>
+            </label>
+            <label class="checkbox-container">
+              <span class="text">Números</span>
+              <input type="checkbox" id="number-check" checked>
+              <span class="checkmark"></span>
+            </label>
+            <label class="checkbox-container">
+              <span class="text">Símbolos</span>
+              <input type="checkbox" id="symbol-check" checked>
+              <span class="checkmark"></span>
+            </label>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="submit">
+        <button id="copy-2">Copiar senha</button>
+      </div>
+    </main>
+    <script>
+      const inputElem = document.querySelector("#password");
+      const upperCaseCheckElem = document.querySelector("#uppercase-check");
+      const numberCheckElem = document.querySelector("#number-check");
+      const symbolCheckElem = document.querySelector("#symbol-check");
+      const securityIndicatorBarElem = document.querySelector('#security-indicator-bar');
+      let passwordLength = 16;
+
+
+      function passwordGenerator() {
+        let chars = "abcdefghijklmnopqrstuvwxyz";
+        
+        const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const numberChars = "1234567890";
+        const symbolChars = "?!@&*()[]"
+        
+        if(upperCaseCheckElem.checked){
+          chars += upperCaseChars;
+        }
+        if(numberCheckElem.checked){
+          chars += numberChars;
+        }
+        if(symbolCheckElem.checked){
+          chars += symbolChars;
+        }
+
+        let password = "";
+
+        for(let i = 0; i < passwordLength; i++) {
+          const randomNumber = Math.floor(Math.random() * chars.length);
+          password += chars.substring(randomNumber, randomNumber+1);
+
+        }
+        inputElem.value = password;
+        secutiyLevel();
+        fontSize();
+      }
+
+      function secutiyLevel() {
+        const percent = Math.round(
+          (passwordLength/64) * 25 +
+          (upperCaseCheckElem.checked ? 15 : 0) +
+          (numberCheckElem.checked ? 25 : 0) +
+          (symbolCheckElem.checked ? 35 : 0)
+        );
+
+        securityIndicatorBarElem.style.width = `${percent}%`;
+        if(percent > 69) {
+          securityIndicatorBarElem.classList.add("safe");
+          securityIndicatorBarElem.classList.remove("critical", "warning");
+        } else if(percent>50) {
+          securityIndicatorBarElem.classList.add("warning");
+          securityIndicatorBarElem.classList.remove("critical", "safe");
+        } else {
+          securityIndicatorBarElem.classList.add("critical");
+          securityIndicatorBarElem.classList.remove("warning", "safe");
+        }
+
+        if(percent>=100) {
+          securityIndicatorBarElem.classList.add("completed");
+        } else {
+          securityIndicatorBarElem.classList.remove("completed");
+
+        }
+      }
+
+      function fontSize() {
+        if(passwordLength > 45){
+          inputElem.classList.remove("font-m");
+          inputElem.classList.remove("font-s");
+          inputElem.classList.add("font-xs");
+        } else if(passwordLength > 32) {
+          inputElem.classList.remove("font-m");
+          inputElem.classList.add("font-s");
+          inputElem.classList.remove("font-xs");
+        } else if(passwordLength > 22) {
+          inputElem.classList.add("font-m");
+          inputElem.classList.remove("font-s");
+          inputElem.classList.remove("font-xs");
+        } else {
+          inputElem.classList.remove("font-m");
+          inputElem.classList.remove("font-s");
+          inputElem.classList.remove("font-xs");
+        }
+      }
+
+      function copy() {
+        navigator.clipboard.writeText(inputElem.value);
+      }
+
+      const passwordLengthElem = document.querySelector("#password-length");
+      passwordLengthElem.addEventListener("input", function () {
+        passwordLength = passwordLengthElem.value;
+        document.querySelector("#password-length-text").innerText = passwordLength;
+        passwordGenerator();
+      })
+      upperCaseCheckElem.addEventListener('click', passwordGenerator);
+      numberCheckElem.addEventListener('click', passwordGenerator);
+      symbolCheckElem.addEventListener('click', passwordGenerator);
+
+      document.querySelector("#copy-1").addEventListener("click", copy);
+      document.querySelector("#copy-2").addEventListener("click", copy);
+      document
+        .querySelector('#renew')
+        .addEventListener("click", passwordGenerator);
+    </script>
+  </body>
+</html>
